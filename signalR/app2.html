@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-1.6.4.js"></script>
+    <script src="Scripts/jquery.signalR-2.4.2.js"></script>
+    <script>
+        $(function () {
+            name = prompt("enter Your Name:")
+            var conn = $.hubConnection();
+             prox = conn.createHubProxy("chat");
+            conn.start();
+            
+            prox.on("newMSG", function (m) {
+                $("ul").append("<li>" + m.sender + ": " + m.message1 + "</li>")
+            })
+            prox.on("newmember", function (n, g) {
+                $("ul").append("<li><i>" + n + "Joinet to : " + g + "<i></li>")
+            })
+            prox.on("sendall", function (n, g,m) {
+                $("ul").append("<li>" + n + " send to : " + g +":"+m+ "</li>")
+            })
+        })
+        function send() {
+            obj = {
+                sender: name,
+                message1: $("#txt").val()
+            };
+           // prox.invoke("sendmessage", name, $("#txt").val())
+            prox.invoke("sendmessage", obj)
+        }
+        function join() {
+            prox.invoke("joining", $("#gtxt").val(), name)
+        }
+        function sendall() {
+            prox.invoke("setnttogroup", name, $("#gtxt").val(), $("#txt").val())
+        }
+    </script>
+</head>
+<body>
+    <input type="text" id="txt" /> <input type="button" value="Send" onclick="send()" />
+    <input type="text" id="gtxt" /> <input type="button" value="Join" onclick="join()" />
+    <br />
+    <input type="button" value="Sent to group" onclick="sendall()" />
+
+    <br />
+    <ul></ul>
+</body>
+</html>
